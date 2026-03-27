@@ -13,7 +13,7 @@
             --text: #ffffff;
         }
 
-        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--bg); display: flex; height: 100vh; overflow: hidden; }
+        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--bg); display: flex; min-height: 100vh; overflow: auto; }
 
         /* Pantalla de Login */
         #login-screen {
@@ -83,7 +83,7 @@
 
         /* Responsive mobile */
         @media (max-width: 900px) {
-            body { flex-direction: column; height: auto; }
+            body { flex-direction: column; min-height: 100vh; overflow: auto; }
             .sidebar {
                 position: fixed;
                 inset: 0 0 auto 0;
@@ -92,7 +92,7 @@
                 transition: transform 0.2s ease;
                 z-index: 1100;
                 overflow-y: auto;
-                height: 100vh;
+                min-height: 100vh;
             }
             .sidebar.open {
                 transform: translateX(0);
@@ -101,6 +101,7 @@
                 width: 100%;
                 padding: 18px;
                 margin-left: 0;
+                overflow-y: auto;
             }
             .mobile-menu-btn {
                 display: block;
@@ -108,7 +109,7 @@
         }
 
         @media (max-width: 500px) {
-            .content { padding: 14px; }
+            .content { padding: 14px; overflow-y: auto; }
             .info-item { margin-bottom: 8px; }
             .deck-grid { grid-template-columns: 1fr; }
         }
