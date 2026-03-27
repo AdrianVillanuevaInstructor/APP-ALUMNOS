@@ -294,6 +294,17 @@
                         }
                     }
 
+                    // Formatear como dinero en sección Abono (Pagos)
+                    if (seccion === 'Abono' && valor !== '---') {
+                        const camposDinero = ['VALOR', 'PAGO ANTES DEL 10', 'CERTIFICADO', 'CUOTA 1', 'CUOTA 2', 'CUOTA 3', 'CUOTA 4', 'CUOTA 5', 'CUOTA 6'];
+                        if (camposDinero.includes(campo.toUpperCase())) {
+                            const num = parseFloat(valor);
+                            if (!isNaN(num)) {
+                                valor = num.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+                            }
+                        }
+                    }
+
                     const info = document.createElement('div');
                     info.className = 'info-item';
                     info.innerHTML = `
