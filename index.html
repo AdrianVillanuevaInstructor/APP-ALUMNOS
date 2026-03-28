@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json" />// Agrega el manifiesto para PWA
+    <meta name="theme-color" content="#6C4AB6" />// Color de la barra de navegación en móviles
     <title>Student Control 2.6</title>
     <link rel="icon" href="favicon.ico" type="image/png">
     <style>
@@ -327,5 +329,12 @@
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
     </script>
+    <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/service-worker.js")
+      .then(() => console.log("SW registrado"))
+      .catch(error => console.log("Error SW:", error));
+  }
+</script>
 </body>
 </html>
