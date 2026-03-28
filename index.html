@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal del Alumno</title>
+    <title>Student Control 2.6</title>
+    <link rel="icon" href="IT%20INSTITUTE.png" type="image/png">
     <style>
         :root {
             --primary: #5D2E80;
@@ -134,9 +135,10 @@
         <div class="login-card">
             <h2>Acceso Alumnos</h2>
             <input type="email" id="emailInput" placeholder="Introduce tu email registrado">
+            <input type="password" id="passwordInput" placeholder="Introduce tu contraseña">
             <button onclick="intentarLogin()" id="btnLogin">Ingresar</button>
             <div class="loader" id="loader"></div>
-            <p id="errorMsg" style="color: #ef4444; font-size: 0.8rem; margin-top: 10px; display: none;">Email no encontrado.</p>
+            <p id="errorMsg" style="color: #ef4444; font-size: 0.8rem; margin-top: 10px; display: none;">Email o contraseña incorrectos.</p>
         </div>
     </div>
 
@@ -164,7 +166,8 @@
 
         async function intentarLogin() {
             const email = document.getElementById('emailInput').value.trim();
-            if (!email) return alert("Ingresa tu email");
+            const password = document.getElementById('passwordInput').value.trim();
+            if (!email || !password) return alert("Ingresa tu email y contraseña");
 
             document.getElementById('btnLogin').style.display = 'none';
             document.getElementById('loader').style.display = 'block';
@@ -173,7 +176,7 @@
             try {
                 // Llamada a Google Sheets usando fetch (JSONP o CORS depende de la implementación)
                 // Para Vercel -> Google Apps Script, usaremos una petición simple
-                const response = await fetch(`${WEB_APP_URL}?email=${email}`);
+                const response = await fetch(`${WEB_APP_URL}?email=${email}&password=${password}`);
                 // Nota: Por seguridad y CORS, Apps Script se maneja mejor con google.script.run si está dentro, 
                 // pero como es para Vercel, el Apps Script debe aceptar parámetros GET.
                 
@@ -181,7 +184,7 @@
                 // Para que funcione el fetch real, el Apps Script debe devolver un ContentService.JSON
                 
                 // Aquí usamos una técnica de "puente". Para este ejemplo, llamaremos al servidor:
-                const res = await fetch(`${WEB_APP_URL}?email=${email}`).then(r => r.json());
+                const res = await fetch(`${WEB_APP_URL}?email=${email}&password=${password}`).then(r => r.json());
 
                 if (res.success) {
                     usuarioEmail = email;
@@ -279,7 +282,7 @@
                 const deckGrid = document.createElement('div');
                 deckGrid.className = 'deck-grid';
 
-                for (let campo in fila) {
+                    for (let campo in fila) {
                     if (campo === 'EMAIL') continue;
 
                     let valor = fila[campo] || '---';
@@ -308,10 +311,33 @@
 
                     const info = document.createElement('div');
                     info.className = 'info-item';
-                    info.innerHTML = `
-                        <label>${campo.replace(/_/g, ' ')}</label>
-                        <span>${valor}</span>
-                    `;
+
+                    let labelText = campo.replace(/_/g, ' ');
+                    let spanElement;
+
+                    if (seccion === 'Alumno' && campo.toUpperCase() === 'CONTRASEÑA') {
+                        // Campo especial para contraseña
+                        spanElement = document.createElement('span');
+                        spanElement.textContent = '********';
+                        spanElement.dataset.realValue = valor;
+                        spanElement.dataset.hidden = 'true';
+                        spanElement.style.cursor = 'pointer';
+                        spanElement.onclick = function() {
+                            if (this.dataset.hidden === 'true') {
+                                this.textContent = this.dataset.realValue;
+                                this.dataset.hidden = 'false';
+                            } else {
+                                this.textContent = '********';
+                                this.dataset.hidden = 'true';
+                            }
+                        };
+                    } else {
+                        spanElement = document.createElement('span');
+                        spanElement.textContent = valor;
+                    }
+
+                    info.innerHTML = `<label>${labelText}</label>`;
+                    info.appendChild(spanElement);
                     deckGrid.appendChild(info);
                 }
 
