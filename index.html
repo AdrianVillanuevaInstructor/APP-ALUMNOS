@@ -146,38 +146,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<button id="instalarBtn" style="
-  display:none;
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  padding:12px 20px;
-  background:#007bff;
-  color:white;
-  border:none;
-  border-radius:8px;
-  font-size:16px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.3);
-  z-index:999;
-">
-  Instalar App
-</button>
 
-<script>
-let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-
-  const botonInstalar = document.getElementById("instalarBtn");
-  botonInstalar.style.display = "block";
-
-  botonInstalar.addEventListener("click", () => {
-    deferredPrompt.prompt();
-  });
-});
-</script>
 
 <body>
 
@@ -369,6 +338,39 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/service-worker.js");
   });
 }
+</script>
+
+<button id="instalarBtn" style="
+  display:none;
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:12px 20px;
+  background:#007bff;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.3);
+  z-index:999;
+">
+  Instalar App
+</button>
+
+<script>
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  const botonInstalar = document.getElementById("instalarBtn");
+  botonInstalar.style.display = "block";
+
+  botonInstalar.addEventListener("click", () => {
+    deferredPrompt.prompt();
+  });
+});
 </script>
 
 </body>
