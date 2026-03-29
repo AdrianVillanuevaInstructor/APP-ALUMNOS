@@ -321,7 +321,37 @@
                     for (let campo in fila) {
                         if (campo === 'EMAIL') continue;
                         let valor = fila[campo] || '---';
-                        deckGrid.innerHTML += `<div class="info-item"><label>${campo.replace(/_/g,' ')}</label><span>${valor}</span></div>`;
+
+                        const info = document.createElement('div');
+                        info.className = 'info-item';
+
+                        let labelText = campo.replace(/_/g, ' ');
+                        let spanElement;
+
+                        if (seccion === 'Alumno' && campo.toUpperCase() === 'CONTRASEÑA') {
+                            // Campo especial para contraseña
+                            spanElement = document.createElement('span');
+                            spanElement.textContent = '********';
+                            spanElement.dataset.realValue = valor;
+                            spanElement.dataset.hidden = 'true';
+                            spanElement.style.cursor = 'pointer';
+                            spanElement.onclick = function() {
+                                if (this.dataset.hidden === 'true') {
+                                    this.textContent = this.dataset.realValue;
+                                    this.dataset.hidden = 'false';
+                                } else {
+                                    this.textContent = '********';
+                                    this.dataset.hidden = 'true';
+                                }
+                            };
+                        } else {
+                            spanElement = document.createElement('span');
+                            spanElement.textContent = valor;
+                        }
+
+                        info.innerHTML = `<label>${labelText}</label>`;
+                        info.appendChild(spanElement);
+                        deckGrid.appendChild(info);
                     }
                     deck.appendChild(deckGrid);
                 }
