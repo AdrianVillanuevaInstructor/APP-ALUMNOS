@@ -246,5 +246,200 @@ function toggleSidebar() {
 }
 </script>
 
+
+
+
+
+<!-- BOTÓN ANDROID -->
+
+<button id="instalarBtn" style="
+
+display:none;
+
+position:fixed;
+
+bottom:20px;
+
+right:20px;
+
+padding:12px 20px;
+
+background:#007bff;
+
+color:white;
+
+border:none;
+
+border-radius:8px;
+
+font-size:16px;
+
+box-shadow:0 4px 10px rgba(0,0,0,0.3);
+
+z-index:9999;">
+
+Instalar App
+
+</button>
+
+
+
+<!-- POPUP iOS -->
+
+<div id="iosPopup" style="
+
+display:none;
+
+position:fixed;
+
+inset:0;
+
+background:rgba(0,0,0,0.6);
+
+z-index:10000;
+
+justify-content:center;
+
+align-items:center;">
+
+<div style="
+
+background:white;
+
+width:90%;
+
+max-width:400px;
+
+padding:25px;
+
+border-radius:16px;
+
+text-align:center;
+
+box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+
+<h3 style="margin-top:0;color:#5D2E80;">Instalar Student Control</h3>
+
+<p style="font-size:14px;">
+
+1️⃣ Toca el botón <b>Compartir</b><br><br>
+
+2️⃣ Selecciona <b>"Agregar a pantalla de inicio"</b>
+
+</p>
+
+<button onclick="cerrarIosPopup()" style="
+
+margin-top:15px;
+
+padding:10px 20px;
+
+border:none;
+
+background:#5D2E80;
+
+color:white;
+
+border-radius:8px;">
+
+Entendido
+
+</button>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+/* SERVICE WORKER */
+
+if("serviceWorker" in navigator){
+
+window.addEventListener("load",()=>{
+
+navigator.serviceWorker.register("/service-worker.js");
+
+});
+
+}
+
+
+
+/* DETECTORES */
+
+function esAndroid(){return /android/i.test(navigator.userAgent);}
+
+function esIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+
+function estaInstalada(){
+
+return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+
+}
+
+
+
+/* ANDROID */
+
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt",(e)=>{
+
+e.preventDefault();
+
+if(estaInstalada()) return;
+
+deferredPrompt=e;
+
+if(esAndroid()){
+
+document.getElementById("instalarBtn").style.display="block";
+
+}
+
+});
+
+document.getElementById("instalarBtn").addEventListener("click",async()=>{
+
+if(!deferredPrompt) return;
+
+deferredPrompt.prompt();
+
+});
+
+
+
+/* iOS */
+
+window.addEventListener("load",()=>{
+
+if(esIOS() && !estaInstalada()){
+
+setTimeout(()=>{
+
+document.getElementById("iosPopup").style.display="flex";
+
+},2000);
+
+}
+
+});
+
+function cerrarIosPopup(){
+
+document.getElementById("iosPopup").style.display="none";
+
+}
+
+</script>
+
+
+
+</body>
+
+</html>
 </body>
 </html>
