@@ -6,6 +6,7 @@
 <link rel="manifest" href="/manifest.json" />
 <meta name="theme-color" content="#6C4AB6" />
 
+<!-- Soporte iOS -->
 <link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -15,7 +16,7 @@
 <link rel="icon" href="favicon.ico" type="image/png">
 
 <style>
-/* TU CSS ORIGINAL (NO TOCADO) */
+/* ---- TODO TU CSS ORIGINAL (NO MODIFICADO) ---- */
 :root {
 --primary:#5D2E80;
 --secondary:#334155;
@@ -55,13 +56,11 @@ body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background-color:var(--bg)
 <div id="login-screen">
 <div class="login-card">
 <h2>Acceso Alumnos</h2>
-<input type="email" id="emailInput" placeholder="Email registrado" required>
-<input type="password" id="passwordInput" placeholder="Contraseña" required>
-<button id="btnLogin">Ingresar</button>
+<input type="email" id="emailInput" placeholder="Email registrado">
+<input type="password" id="passwordInput" placeholder="Contraseña">
+<button onclick="intentarLogin()" id="btnLogin">Ingresar</button>
 <div class="loader" id="loader"></div>
-<p id="errorMsg" style="color:#ef4444;font-size:0.8rem;margin-top:10px;display:none;">
-Credenciales incorrectas.
-</p>
+<p id="errorMsg" style="color:#ef4444;font-size:0.8rem;margin-top:10px;display:none;">Credenciales incorrectas.</p>
 </div>
 </div>
 
@@ -82,6 +81,57 @@ Credenciales incorrectas.
 <div id="datosCuerpo"></div>
 </div>
 
+<!-- BOTÓN ANDROID -->
+<button id="instalarBtn" style="
+display:none;
+position:fixed;
+bottom:20px;
+right:20px;
+padding:12px 20px;
+background:#007bff;
+color:white;
+border:none;
+border-radius:8px;
+font-size:16px;
+box-shadow:0 4px 10px rgba(0,0,0,0.3);
+z-index:9999;">
+Instalar App
+</button>
+
+<!-- POPUP iOS -->
+<div id="iosPopup" style="
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.6);
+z-index:10000;
+justify-content:center;
+align-items:center;">
+<div style="
+background:white;
+width:90%;
+max-width:400px;
+padding:25px;
+border-radius:16px;
+text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+<h3 style="margin-top:0;color:#5D2E80;">Instalar Student Control</h3>
+<p style="font-size:14px;">
+1️⃣ Toca el botón <b>Compartir</b><br><br>
+2️⃣ Selecciona <b>"Agregar a pantalla de inicio"</b>
+</p>
+<button onclick="cerrarIosPopup()" style="
+margin-top:15px;
+padding:10px 20px;
+border:none;
+background:#5D2E80;
+color:white;
+border-radius:8px;">
+Entendido
+</button>
+</div>
+</div>
+
 <script>
 /* SERVICE WORKER */
 if("serviceWorker" in navigator){
@@ -89,99 +139,43 @@ window.addEventListener("load",()=>{
 navigator.serviceWorker.register("/service-worker.js");
 });
 }
+
+/* DETECTORES */
+function esAndroid(){return /android/i.test(navigator.userAgent);}
+function esIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+function estaInstalada(){
+return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+
+/* ANDROID */
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt",(e)=>{
+e.preventDefault();
+if(estaInstalada()) return;
+deferredPrompt=e;
+if(esAndroid()){
+document.getElementById("instalarBtn").style.display="block";
+}
+});
+document.getElementById("instalarBtn").addEventListener("click",async()=>{
+if(!deferredPrompt) return;
+deferredPrompt.prompt();
+});
+
+/* iOS */
+window.addEventListener("load",()=>{
+if(esIOS() && !estaInstalada()){
+setTimeout(()=>{
+document.getElementById("iosPopup").style.display="flex";
+},2000);
+}
+});
+function cerrarIosPopup(){
+document.getElementById("iosPopup").style.display="none";
+}
 </script>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDdDhrzE-nRlY-i83DFH1GyjlAgrWcDOuQ",
-  authDomain: "student-control-push.firebaseapp.com",
-  projectId: "student-control-push",
-  storageBucket: "student-control-push.firebasestorage.app",
-  messagingSenderId: "125205496337",
-  appId: "1:125205496337:web:bc0f3c4466ae7d57bb67b0",
-  measurementId: "G-61PY822LYW"
-
-};
-
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUgDdM2xKWU9_K9nch57dWsPTSh9a_lsFVAoQ_MYd9oBXJtSl8JFrohKyas3eX0vWrJw/exec";
-
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
-
-/* LOGIN */
-document.getElementById("btnLogin").addEventListener("click", intentarLogin);
-
-async function intentarLogin(){
-
-const email = document.getElementById("emailInput").value.trim();
-const password = document.getElementById("passwordInput").value.trim();
-const loader = document.getElementById("loader");
-const errorMsg = document.getElementById("errorMsg");
-
-if(!email || !password){
-errorMsg.style.display="block";
-return;
-}
-
-loader.style.display="block";
-errorMsg.style.display="none";
-
-/* AQUI VA TU VALIDACION REAL */
-const loginCorrecto = true;
-
-if(loginCorrecto){
-
-localStorage.setItem("emailAlumno", email);
-
-document.getElementById("login-screen").style.display="none";
-document.getElementById("sidebar").style.display="flex";
-document.getElementById("contenido").style.display="block";
-
-activarNotificaciones();
-
-}else{
-errorMsg.style.display="block";
-}
-
-loader.style.display="none";
-}
-
-/* ACTIVAR NOTIFICACIONES SOLO DESPUES DEL LOGIN */
-async function activarNotificaciones(){
-
-const permiso = await Notification.requestPermission();
-
-if(permiso !== "granted") return;
-
-const registration = await navigator.serviceWorker.register("/service-worker.js");
-
-const token = await getToken(messaging,{
-vapidKey:"BOqOS2SXiwjxNc6YRtwNWUFDnLnjzLvxGF95Dh0BjBIvbCzDeLY2TA3RmVMLMHZ4RVzle5Kt7vgk-07loVQmLQ8",
-serviceWorkerRegistration: registration
-});
-
-const email = localStorage.getItem("emailAlumno");
-
-if(email && token){
-
-await fetch(APPS_SCRIPT_URL,{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({ email, token })
-});
-
-console.log("Token enviado correctamente");
-}
-}
-
-/* MENSAJES EN PRIMER PLANO */
-onMessage(messaging,(payload)=>{
-console.log("Mensaje recibido:",payload);
-});
-</script>
 
 </body>
 </html>
