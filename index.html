@@ -114,12 +114,13 @@
 <div class="sidebar" id="sidebar">
     <h2>Portal Alumno</h2>
     <button onclick="mostrarSeccion('Alumno')">👤 Mis Datos</button>
-    <button onclick="mostrarSeccion('Asistencias')">📅 Asistencias</button>
-    <button onclick="mostrarSeccion('Practicas')">🧪 Prácticas</button>
-    <button onclick="mostrarSeccion('Recuperaciones')">🔄 Recuperaciones</button>
+    <button onclick="mostrarSeccion('Asistencias')">📅 Mis Asistencias</button>
+    <button onclick="mostrarSeccion('Practicas')">🧪 Mis Prácticas</button>
+    <button onclick="mostrarSeccion('Recuperaciones')">🔄 Mis Recuperaciones</button>
     <button onclick="mostrarSeccion('Abono')">💰 Mis Pagos</button>
     <button class="logout" onclick="location.reload()">Cerrar Sesión</button>
 </div>
+
 
 <div class="content" id="contenido">
     <h1 id="seccionTitulo">Cargando...</h1>
@@ -208,7 +209,7 @@ function mostrarSeccion(tipo) {
             html += `</div></div>`;
             cuerpo.innerHTML += html;
         });
-        
+
     } else {
         registros.forEach(row => {
             let itemHtml = `<div class="pago-master-card" style="border-top-color:#cbd5e1"><div class="pago-datos-generales">`;
