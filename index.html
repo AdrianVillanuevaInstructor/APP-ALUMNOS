@@ -100,7 +100,7 @@
 
 <div id="login-screen">
     <div class="login-card">
-        <h2 style="color:var(--primary)">IT Institute</h2>
+        <h2 style="color:var(--primary)">IT Institute Argentina</h2>
         <input type="email" id="emailInput" placeholder="Email registrado">
         <input type="password" id="passwordInput" placeholder="Contraseña">
         <button onclick="intentarLogin()" id="btnLogin">INGRESAR</button>
@@ -114,9 +114,9 @@
 <div class="sidebar" id="sidebar">
     <h2>Portal Alumno</h2>
     <button onclick="mostrarSeccion('Alumno')">👤 Mis Datos</button>
-    <button onclick="mostrarSeccion('Asistencias')">📅 Asistencias</button>
-    <button onclick="mostrarSeccion('Practicas')">🧪 Prácticas</button>
-    <button onclick="mostrarSeccion('Recuperaciones')">🔄 Recuperaciones</button>
+    <button onclick="mostrarSeccion('Asistencias')">📅 Mis Asistencias</button>
+    <button onclick="mostrarSeccion('Practicas')">🧪 Mis Prácticas</button>
+    <button onclick="mostrarSeccion('Recuperaciones')">🔄 Mis Recuperaciones</button>
     <button onclick="mostrarSeccion('Abono')">💰 Mis Pagos</button>
     <button class="logout" onclick="location.reload()">Cerrar Sesión</button>
 </div>
@@ -208,7 +208,7 @@ function mostrarSeccion(tipo) {
             html += `</div></div>`;
             cuerpo.innerHTML += html;
         });
-        
+
     } else {
         registros.forEach(row => {
             let itemHtml = `<div class="pago-master-card" style="border-top-color:#cbd5e1"><div class="pago-datos-generales">`;
