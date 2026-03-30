@@ -135,7 +135,8 @@ const formatVisual = (key, val) => {
     if (val === "" || val === null || val === undefined) return "-";
     const k = key.toUpperCase();
     if (k.includes("CUENTA")) return val;
-    if (k.includes("MONTO") || k.includes("CUOTA") || k.includes("PAGO") || k.includes("SALDO") || k.includes("INSCRIP")) {
+    // Agregado CERTIFICADO a la lista de formato moneda
+    if (k.includes("MONTO") || k.includes("CUOTA") || k.includes("PAGO") || k.includes("SALDO") || k.includes("INSCRIP") || k.includes("CERTIFICADO")) {
         if (!isNaN(val)) return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(val);
     }
     if (k.includes("FECHA") || k.includes("VENC")) {
@@ -244,8 +245,6 @@ function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open'); 
 }
 </script>
-
-
 
 </body>
 </html>
