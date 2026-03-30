@@ -1,177 +1,245 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="manifest" href="/manifest.json" />
-<meta name="theme-color" content="#6C4AB6" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#6C4AB6" />
 
-<!-- Soporte iOS -->
-<link rel="apple-touch-icon" href="/icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Student Control">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Student Control">
 
-<title>Student Control 2.6</title>
-<link rel="icon" href="favicon.ico" type="image/png">
+    <title>Student Control 2.6</title>
+    <link rel="icon" href="favicon.ico" type="image/png">
 
-<style>
-/* ---- TODO TU CSS ORIGINAL (NO MODIFICADO) ---- */
-:root {
---primary:#5D2E80;
---secondary:#334155;
---accent:#5D2E80;
---bg:#f4f6f9;
---text:#ffffff;
---info-text:#5CC6D0;
-}
-body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background-color:var(--bg);display:flex;min-height:100vh;overflow:auto;}
-#login-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--primary);display:flex;justify-content:center;align-items:center;z-index:1000;}
-.login-card{background:white;padding:40px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.2);text-align:center;width:100%;max-width:350px;}
-.login-card h2{color:var(--primary);margin-bottom:20px;}
-.login-card input{width:100%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;}
-.login-card button{width:100%;padding:12px;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;}
-.sidebar{width:260px;background:var(--primary);color:white;padding:20px;display:none;flex-direction:column;}
-.sidebar h2{font-size:1.2rem;border-bottom:1px solid var(--secondary);padding-bottom:15px;margin-bottom:20px;text-align:center;}
-.sidebar button{width:100%;margin:8px 0;padding:12px 15px;border:none;background:var(--secondary);color:white;cursor:pointer;text-align:left;border-radius:8px;transition:0.3s;font-size:0.9rem;}
-.sidebar button:hover{background:var(--accent);}
-.sidebar .logout{margin-top:auto;background:#00e0e7;margin-bottom:20px;}
-.content{flex:1;padding:40px;overflow-y:auto;display:none;}
-#seccionTitulo{text-align:center;margin-bottom:20px;font-size:2rem;letter-spacing:0.02em;color:var(--info-text);}
-.mobile-menu-btn{display:none;position:fixed;top:16px;left:16px;z-index:1200;background:var(--accent);color:white;border:none;border-radius:8px;padding:10px 14px;font-size:1.1rem;cursor:pointer;}
-@media(max-width:900px){
-.sidebar{position:fixed;inset:0 0 auto 0;width:250px;transform:translateX(-100%);transition:transform 0.2s ease;z-index:1100;min-height:100vh;}
-.sidebar.open{transform:translateX(0);display:flex;}
-.content{width:100%;padding:20px;margin-left:0;padding-top:70px;}
-.mobile-menu-btn{display:block;}
-}
-.loader{border:4px solid #f3f3f3;border-top:4px solid var(--accent);border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;display:none;margin:10px auto;}
-@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-</style>
+    <style>
+        :root {
+            --primary: #5D2E80;
+            --secondary: #334155;
+            --accent: #5D2E80;
+            --bg: #f4f6f9;
+            --info-text: #5CC6D0;
+            --success: #10b981;
+        }
+
+        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--bg); display: flex; min-height: 100vh; color: #1e293b; overflow-x: hidden; }
+
+        /* Login */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 3000;
+        }
+        .login-card {
+            background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center; width: 100%; max-width: 350px;
+        }
+        .login-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .login-card button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* Sidebar con corrección de ocultamiento */
+        .sidebar { 
+            width: 260px; background: var(--primary); color: white; padding: 20px; 
+            display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0;
+            transition: all 0.3s ease-in-out;
+        }
+        .sidebar h2 { font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
+        .sidebar button { width: 100%; margin: 8px 0; padding: 12px 15px; border: none; background: rgba(255,255,255,0.1); color: white; cursor: pointer; text-align: left; border-radius: 8px; transition: 0.3s; }
+        .sidebar button:hover { background: var(--info-text); color: var(--primary); }
+        .sidebar .logout { margin-top: auto; background: #ef4444; margin-bottom: 20px; text-align: center; }
+
+        .content { flex: 1; padding: 40px; overflow-y: auto; display: none; }
+        #seccionTitulo { text-align: center; margin-bottom: 30px; font-size: 1.8rem; color: var(--primary); font-weight: 800; text-transform: uppercase; }
+
+        /* Cards Estilizadas */
+        .pago-master-card {
+            background: white; border-radius: 20px; padding: 25px; margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 6px solid var(--primary);
+        }
+        .pago-datos-generales {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px dashed #e2e8f0;
+        }
+        .general-item { background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #edf2f7; text-align: center; position: relative; }
+        .general-label { font-size: 0.65rem; color: #64748b; text-transform: uppercase; font-weight: bold; display: block; }
+        .general-value { font-size: 0.95rem; font-weight: 700; color: #1e293b; }
+
+        /* Password Toggle Style */
+        .pass-container { cursor: pointer; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .pass-hidden { font-family: monospace; letter-spacing: 3px; }
+
+        .cuotas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+        .mini-cuota-card {
+            background: #ffffff; border: 2px solid #f1f5f9; border-radius: 12px; padding: 15px;
+            display: flex; flex-direction: column; align-items: center; text-align: center; transition: 0.2s;
+        }
+        .mini-label { font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 5px; }
+        .mini-monto { font-size: 1.1rem; font-weight: 800; color: var(--success); }
+        .mini-vencimiento { font-size: 0.75rem; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 20px; margin-top: 5px; }
+
+        /* Mobile Adjustments Fina */
+        .mobile-menu-btn { display: none; position: fixed; top: 16px; left: 16px; z-index: 2000; background: var(--primary); color: white; border: none; border-radius: 8px; padding: 10px 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        
+        @media (max-width: 900px) {
+            .sidebar { 
+                position: fixed; left: -100%; top: 0; bottom: 0; z-index: 1500; 
+                width: 280px; visibility: hidden; 
+            }
+            .sidebar.open { left: 0; visibility: visible; box-shadow: 5px 0 25px rgba(0,0,0,0.3); }
+            .content { padding: 15px; padding-top: 80px; width: 100%; }
+            .mobile-menu-btn { display: block; }
+        }
+
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; display: none; margin: 10px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="login-screen">
-<div class="login-card">
-<h2>Acceso Alumnos</h2>
-<input type="email" id="emailInput" placeholder="Email registrado">
-<input type="password" id="passwordInput" placeholder="Contraseña">
-<button onclick="intentarLogin()" id="btnLogin">Ingresar</button>
-<div class="loader" id="loader"></div>
-<p id="errorMsg" style="color:#ef4444;font-size:0.8rem;margin-top:10px;display:none;">Credenciales incorrectas.</p>
-</div>
+    <div class="login-card">
+        <h2 style="color:var(--primary)">IT Institute</h2>
+        <input type="email" id="emailInput" placeholder="Email registrado">
+        <input type="password" id="passwordInput" placeholder="Contraseña">
+        <button onclick="intentarLogin()" id="btnLogin">INGRESAR</button>
+        <div class="loader" id="loader"></div>
+        <p id="errorMsg" style="color:#ef4444;font-size:0.8rem;margin-top:10px;display:none;">Acceso denegado.</p>
+    </div>
 </div>
 
 <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
 
 <div class="sidebar" id="sidebar">
-<h2>Portal Alumno</h2>
-<button onclick="mostrarSeccion('Alumno')">👤 Mis Datos</button>
-<button onclick="mostrarSeccion('Asistencias')">📅 Asistencias</button>
-<button onclick="mostrarSeccion('Practicas')">🧪 Prácticas</button>
-<button onclick="mostrarSeccion('Recuperaciones')">🔄 Recuperaciones</button>
-<button onclick="mostrarSeccion('Abono')">💰 Mis Pagos</button>
-<button class="logout" onclick="location.reload()">Cerrar Sesión</button>
+    <h2>Portal Alumno</h2>
+    <button onclick="mostrarSeccion('Alumno')">👤 Mis Datos</button>
+    <button onclick="mostrarSeccion('Asistencias')">📅 Asistencias</button>
+    <button onclick="mostrarSeccion('Practicas')">🧪 Prácticas</button>
+    <button onclick="mostrarSeccion('Recuperaciones')">🔄 Recuperaciones</button>
+    <button onclick="mostrarSeccion('Abono')">💰 Mis Pagos</button>
+    <button class="logout" onclick="location.reload()">Cerrar Sesión</button>
 </div>
 
 <div class="content" id="contenido">
-<h1 id="seccionTitulo">Bienvenido</h1>
-<div id="datosCuerpo"></div>
-</div>
-
-<!-- BOTÓN ANDROID -->
-<button id="instalarBtn" style="
-display:none;
-position:fixed;
-bottom:20px;
-right:20px;
-padding:12px 20px;
-background:#007bff;
-color:white;
-border:none;
-border-radius:8px;
-font-size:16px;
-box-shadow:0 4px 10px rgba(0,0,0,0.3);
-z-index:9999;">
-Instalar App
-</button>
-
-<!-- POPUP iOS -->
-<div id="iosPopup" style="
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,0.6);
-z-index:10000;
-justify-content:center;
-align-items:center;">
-<div style="
-background:white;
-width:90%;
-max-width:400px;
-padding:25px;
-border-radius:16px;
-text-align:center;
-box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-<h3 style="margin-top:0;color:#5D2E80;">Instalar Student Control</h3>
-<p style="font-size:14px;">
-1️⃣ Toca el botón <b>Compartir</b><br><br>
-2️⃣ Selecciona <b>"Agregar a pantalla de inicio"</b>
-</p>
-<button onclick="cerrarIosPopup()" style="
-margin-top:15px;
-padding:10px 20px;
-border:none;
-background:#5D2E80;
-color:white;
-border-radius:8px;">
-Entendido
-</button>
-</div>
+    <h1 id="seccionTitulo">Cargando...</h1>
+    <div id="datosCuerpo" class="data-container"></div>
 </div>
 
 <script>
-/* SERVICE WORKER */
-if("serviceWorker" in navigator){
-window.addEventListener("load",()=>{
-navigator.serviceWorker.register("/service-worker.js");
-});
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCXpzuTYFNieTm7Ymmi5Ktq5UrnebZuURQbEYqIxJCG3stI-W6Hq_pd86ov5owBmZjOQ/exec";
+let datosGlobales = null;
+
+const formatVisual = (key, val) => {
+    if (val === "" || val === null || val === undefined) return "-";
+    const k = key.toUpperCase();
+    if (k.includes("CUENTA")) return val;
+    if (k.includes("MONTO") || k.includes("CUOTA") || k.includes("PAGO") || k.includes("SALDO") || k.includes("INSCRIP")) {
+        if (!isNaN(val)) return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(val);
+    }
+    if (k.includes("FECHA") || k.includes("VENC")) {
+        let f = new Date(val);
+        return isNaN(f.getTime()) ? val : f.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+    return val;
+};
+
+// Función para alternar visibilidad de contraseña
+function togglePass(id, originalPass) {
+    const el = document.getElementById(id);
+    if (el.classList.contains('pass-hidden')) {
+        el.innerText = originalPass;
+        el.classList.remove('pass-hidden');
+    } else {
+        el.innerText = "••••••";
+        el.classList.add('pass-hidden');
+    }
 }
 
-/* DETECTORES */
-function esAndroid(){return /android/i.test(navigator.userAgent);}
-function esIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
-function estaInstalada(){
-return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+async function intentarLogin() {
+    const email = document.getElementById('emailInput').value.trim();
+    const password = document.getElementById('passwordInput').value.trim();
+    const btn = document.getElementById('btnLogin'), loader = document.getElementById('loader'), errorMsg = document.getElementById('errorMsg');
+    
+    if (!email || !password) return;
+    btn.disabled = true; loader.style.display = "block"; errorMsg.style.display = "none";
+
+    try {
+        const resp = await fetch(`${SCRIPT_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
+        const res = await resp.json();
+        if (res.success) {
+            datosGlobales = res.data;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('contenido').style.display = 'block';
+            mostrarSeccion('Alumno');
+        } else { errorMsg.style.display = "block"; }
+    } catch (e) { alert("Error de conexión"); }
+    finally { btn.disabled = false; loader.style.display = "none"; }
 }
 
-/* ANDROID */
-let deferredPrompt;
-window.addEventListener("beforeinstallprompt",(e)=>{
-e.preventDefault();
-if(estaInstalada()) return;
-deferredPrompt=e;
-if(esAndroid()){
-document.getElementById("instalarBtn").style.display="block";
-}
-});
-document.getElementById("instalarBtn").addEventListener("click",async()=>{
-if(!deferredPrompt) return;
-deferredPrompt.prompt();
-});
+function mostrarSeccion(tipo) {
+    const titulo = document.getElementById('seccionTitulo'), cuerpo = document.getElementById('datosCuerpo');
+    titulo.innerText = tipo === 'Abono' ? 'Mis Pagos' : tipo;
+    cuerpo.innerHTML = "";
 
-/* iOS */
-window.addEventListener("load",()=>{
-if(esIOS() && !estaInstalada()){
-setTimeout(()=>{
-document.getElementById("iosPopup").style.display="flex";
-},2000);
+    if (!datosGlobales || !datosGlobales[tipo]) {
+        cuerpo.innerHTML = "<p style='text-align:center'>No hay registros.</p>";
+        return;
+    }
+
+    const registros = datosGlobales[tipo];
+
+    if (tipo === 'Abono') {
+        registros.forEach(row => {
+            let html = `<div class="pago-master-card"><div class="pago-datos-generales">`;
+            Object.keys(row).forEach(key => {
+                const k = key.toUpperCase();
+                if (k === "EMAIL" || k.includes("CUOTA") || k.includes("VENCIMIENTO") || k.includes("VENC")) return;
+                html += `<div class="general-item"><span class="general-label">${key}</span><span class="general-value">${formatVisual(key, row[key])}</span></div>`;
+            });
+            html += `</div><div class="cuotas-grid">`;
+            for(let i=1; i<=6; i++) {
+                let cuotaKey = Object.keys(row).find(k => k.toUpperCase() === `CUOTA ${i}` || k.toUpperCase() === `CUOTA${i}`);
+                let vencKey = Object.keys(row).find(k => k.toUpperCase() === `VENCIMIENTO ${i}` || k.toUpperCase() === `VENCIMIENTO${i}` || k.toUpperCase() === `VENC ${i}`);
+                if (cuotaKey) {
+                    html += `<div class="mini-cuota-card"><span class="mini-label">CUOTA ${i}</span><span class="mini-monto">${formatVisual(cuotaKey, row[cuotaKey])}</span><span class="mini-vencimiento">${row[vencKey] ? formatVisual(vencKey, row[vencKey]) : 'Sin fecha'}</span></div>`;
+                }
+            }
+            html += `</div></div>`;
+            cuerpo.innerHTML += html;
+        });
+    } else {
+        registros.forEach(row => {
+            let itemHtml = `<div class="pago-master-card" style="border-top-color:#cbd5e1"><div class="pago-datos-generales">`;
+            Object.keys(row).forEach((k, idx) => {
+                if(k.toUpperCase() === "EMAIL") return;
+                
+                // Lógica especial para CONTRASEÑA
+                if(k.toUpperCase().includes("CONTRASEÑA")) {
+                    const passId = `pass-${idx}`;
+                    itemHtml += `
+                    <div class="general-item">
+                        <span class="general-label">${k}</span>
+                        <div class="pass-container" onclick="togglePass('${passId}', '${row[k]}')">
+                            <span id="${passId}" class="general-value pass-hidden">••••••</span> 👁️
+                        </div>
+                    </div>`;
+                } else {
+                    itemHtml += `<div class="general-item"><span class="general-label">${k}</span><span class="general-value">${formatVisual(k, row[k])}</span></div>`;
+                }
+            });
+            itemHtml += `</div></div>`;
+            cuerpo.innerHTML += itemHtml;
+        });
+    }
+    // Cerrar sidebar al elegir sección en móviles
+    if(window.innerWidth < 900) {
+        document.getElementById('sidebar').classList.remove('open');
+    }
 }
-});
-function cerrarIosPopup(){
-document.getElementById("iosPopup").style.display="none";
+
+function toggleSidebar() { 
+    document.getElementById('sidebar').classList.toggle('open'); 
 }
 </script>
 
