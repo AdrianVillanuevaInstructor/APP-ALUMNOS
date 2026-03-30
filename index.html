@@ -175,5 +175,56 @@ document.getElementById("iosPopup").style.display="none";
 }
 </script>
 
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDdDhrzE-nRlY-i83DFH1GyjlAgrWcDOuQ",
+  authDomain: "student-control-push.firebaseapp.com",
+  projectId: "student-control-push",
+  storageBucket: "student-control-push.firebasestorage.app",
+  messagingSenderId: "125205496337",
+  appId: "1:125205496337:web:bc0f3c4466ae7d57bb67b0",
+  measurementId: "G-61PY822LYW"
+};
+
+const app = initializeApp(firebaseConfig);
+
+async function activarNotificaciones() {
+
+  const permiso = await Notification.requestPermission();
+
+  if (permiso === "granted") {
+
+    // 🔥 REGISTRAR SERVICE WORKER
+    const registration = await navigator.serviceWorker.register("/service-worker.js");
+
+    const messaging = getMessaging(app);
+
+    const token = await getToken(messaging, {
+      vapidKey: "BOqOS2SXiwjxNc6YRtwNWUFDnLnjzLvxGF95Dh0BjBIvbCzDeLY2TA3RmVMLMHZ4RVzle5Kt7vgk-07loVQmLQ8",
+      serviceWorkerRegistration: registration
+    });
+
+    console.log("TOKEN DEL DISPOSITIVO:");
+    console.log(token);
+
+  } else {
+    console.log("Permiso denegado");
+  }
+}
+
+activarNotificaciones();
+
+const messaging = getMessaging(app);
+
+onMessage(messaging, (payload) => {
+  console.log("Mensaje recibido:", payload);
+});
+</script>
+
+
+
 </body>
 </html>
