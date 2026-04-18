@@ -11,10 +11,122 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Student Control">
 
-    <title>Student Control 2.6</title>
+    <title>Student Control 2.7</title>
     <link rel="icon" href="favicon.ico" type="image/png">
 
     <style>
+
+        /* ===== CARD TRANSFERENCIA PROFESIONAL ===== */
+.transfer-card {
+    background: linear-gradient(135deg, #f8fafc, #eef2f7);
+    border: 2px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 18px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: grid;
+    gap: 14px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    grid-column: 1 / -1;
+}
+
+.transfer-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+}
+
+.transfer-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.transfer-icon {
+    font-size: 1.5rem;
+}
+
+.transfer-data {
+    font-size: 0.85rem;
+    background: white;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.transfer-data strong {
+    color: #334155;
+}
+
+.transfer-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.btn-copy-main,
+.btn-copy-sec {
+    width: 100%;
+}
+
+.btn-copy-main {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-copy-main:hover {
+    opacity: 0.92;
+}
+
+.btn-copy-sec {
+    background: white;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.transfer-note {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-align: center;
+    margin-top: 6px;
+}
+
+@media (min-width: 720px) {
+    .transfer-buttons {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .btn-copy-main,
+    .btn-copy-sec {
+        flex: 1;
+    }
+
+    .btn-copy-main {
+        margin-right: 8px;
+    }
+
+    .btn-copy-sec {
+        margin-left: 8px;
+    }
+}
+
         :root {
             --primary: #5D2E80;
             --secondary: #334155;
@@ -207,6 +319,43 @@ function mostrarSeccion(tipo) {
                     html += `<div class="mini-cuota-card"><span class="mini-label">CUOTA ${i}</span><span class="mini-monto">${formatVisual(cuotaKey, row[cuotaKey])}</span><span class="mini-vencimiento">${row[vencKey] ? formatVisual(vencKey, row[vencKey]) : 'Sin fecha'}</span></div>`;
                 }
             }
+
+            // ===== CARD TRANSFERENCIA =====
+html += `
+<div class="transfer-card">
+    <div class="transfer-header">
+        <span class="transfer-icon">🏦</span>
+        DATOS PARA TRANSFERENCIA
+    </div>
+
+    <div class="transfer-data">
+        <strong>Alias:</strong><br> iti.arg
+    </div>
+
+    <div class="transfer-data">
+        <strong>CVU:</strong><br> 0000003100030690829838
+    </div>
+
+    <div class="transfer-data">
+        <strong>Nombre:</strong><br> Adrian Alberto Villanueva
+    </div>
+
+    <div class="transfer-buttons">
+        <button class="btn-copy-main" onclick="copiarTexto('iti.arg')">
+            COPIAR ALIAS
+        </button>
+
+        <button class="btn-copy-sec" onclick="copiarTexto('0000003100030690829838')">
+            COPIAR CVU
+        </button>
+    </div>
+
+    <div class="transfer-note">
+        Una vez realizada la transferencia enviar comprobante al profesor.
+    </div>
+</div>
+`;
+
             html += `</div></div>`;
             cuerpo.innerHTML += html;
         });
@@ -350,8 +499,6 @@ Entendido
 
 </div>
 
-
-
 <script>
 
 /* SERVICE WORKER */
@@ -366,8 +513,6 @@ navigator.serviceWorker.register("/service-worker.js");
 
 }
 
-
-
 /* DETECTORES */
 
 function esAndroid(){return /android/i.test(navigator.userAgent);}
@@ -379,8 +524,6 @@ function estaInstalada(){
 return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
 
 }
-
-
 
 /* ANDROID */
 
@@ -410,33 +553,30 @@ deferredPrompt.prompt();
 
 });
 
-
-
 /* iOS */
 
 window.addEventListener("load",()=>{
-
 if(esIOS() && !estaInstalada()){
-
 setTimeout(()=>{
-
 document.getElementById("iosPopup").style.display="flex";
-
 },2000);
-
 }
 
 });
 
 function cerrarIosPopup(){
-
 document.getElementById("iosPopup").style.display="none";
+}
 
+function copiarTexto(texto) {
+    navigator.clipboard.writeText(texto).then(() => {
+        alert("Copiado correctamente ✅");
+    }).catch(() => {
+        alert("No se pudo copiar automáticamente.");
+    });
 }
 
 </script>
-
-
 
 </body>
 
