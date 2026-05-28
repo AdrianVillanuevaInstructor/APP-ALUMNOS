@@ -251,7 +251,7 @@ const formatVisual = (key, val) => {
     if (k.includes("MONTO") || k.includes("CUOTA") || k.includes("PAGO") || k.includes("SALDO") || k.includes("INSCRIP") || k.includes("CERTIFICADO")) {
         if (!isNaN(val)) return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(val);
     }
-    if (k.includes("FECHA") || k.includes("VENC") || k.includes("PRÁCTICA") || k.includes("RECUPERACIÓN")) {
+    if ((k.includes("FECHA") || k.includes("VENC") || k.includes("PRÁCTICA") || k.includes("RECUPERACIÓN")) && !k.includes("TOTAL")) {
         let f = new Date(val);
         return isNaN(f.getTime()) ? val : f.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
