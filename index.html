@@ -159,6 +159,7 @@
         .sidebar h2 { font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
         .sidebar button { width: 100%; margin: 8px 0; padding: 12px 15px; border: none; background: rgba(255,255,255,0.1); color: white; cursor: pointer; text-align: left; border-radius: 8px; transition: 0.3s; }
         .sidebar button:hover { background: var(--info-text); color: var(--primary); }
+        .sidebar button.active { background: var(--info-text); color: var(--primary); font-weight: 700; }
         .sidebar .logout { margin-top: auto; background: #ef4444; margin-bottom: 20px; text-align: center; }
 
         .content { flex: 1; padding: 40px; overflow-y: auto; display: none; }
@@ -225,11 +226,11 @@
 
 <div class="sidebar" id="sidebar">
     <h2>Portal Alumno</h2>
-    <button onclick="mostrarSeccion('Alumno')">👤 Mis Datos</button>
-    <button onclick="mostrarSeccion('Asistencias')">📅 Mis Asistencias</button>
-    <button onclick="mostrarSeccion('Practicas')">🧪 Mis Prácticas</button>
-    <button onclick="mostrarSeccion('Recuperaciones')">🔄 Mis Recuperaciones</button>
-    <button onclick="mostrarSeccion('Abono')">💰 Mis Pagos</button>
+    <button data-seccion="Alumno" onclick="mostrarSeccion('Alumno')">👤 Mis Datos</button>
+    <button data-seccion="Asistencias" onclick="mostrarSeccion('Asistencias')">📅 Mis Asistencias</button>
+    <button data-seccion="Practicas" onclick="mostrarSeccion('Practicas')">🧪 Mis Prácticas</button>
+    <button data-seccion="Recuperaciones" onclick="mostrarSeccion('Recuperaciones')">🔄 Mis Recuperaciones</button>
+    <button data-seccion="Abono" onclick="mostrarSeccion('Abono')">💰 Mis Pagos</button>
     <button class="logout" onclick="location.reload()">Cerrar Sesión</button>
 </div>
 
@@ -243,17 +244,49 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCXpzuTYFNieTm7Ymmi5Ktq5UrnebZuURQbEYqIxJCG3stI-W6Hq_pd86ov5owBmZjOQ/exec";
 let datosGlobales = null;
 
+const normalizarTexto = (texto = "") => texto.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+
+const getEtiquetaVisual = (key) => {
+    const n = normalizarTexto(key);
+    if (n.includes("PROXIMA") && n.includes("PRACTICA")) return "PRÓXIMA PRÁCTICA";
+    return key;
+};
+
+const formatFechaLatina = (fecha) => {
+    if (fecha === "" || fecha === null || fecha === undefined) return "-";
+
+    const texto = fecha.toString().trim();
+    const fechaDirecta = texto.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    if (fechaDirecta) {
+        const [, dia, mes, anio] = fechaDirecta;
+        return `${String(dia).padStart(2, '0')}-${String(mes).padStart(2, '0')}-${anio}`;
+    }
+
+    const fechaIso = texto.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+    if (fechaIso) {
+        const [, anio, mes, dia] = fechaIso;
+        return `${String(dia).padStart(2, '0')}-${String(mes).padStart(2, '0')}-${anio}`;
+    }
+
+    const f = new Date(texto);
+    if (isNaN(f.getTime())) return texto;
+    const dia = String(f.getDate()).padStart(2, '0');
+    const mes = String(f.getMonth() + 1).padStart(2, '0');
+    const anio = f.getFullYear();
+    return `${dia}-${mes}-${anio}`;
+};
+
 const formatVisual = (key, val) => {
     if (val === "" || val === null || val === undefined) return "-";
     const k = key.toUpperCase();
+    const nk = normalizarTexto(key);
     if (k.includes("CUENTA")) return val;
     // Agregado CERTIFICADO a la lista de formato moneda
     if (k.includes("MONTO") || k.includes("CUOTA") || k.includes("PAGO") || k.includes("SALDO") || k.includes("INSCRIP") || k.includes("CERTIFICADO")) {
         if (!isNaN(val)) return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(val);
     }
-    if ((k.includes("FECHA") || k.includes("VENC") || k.includes("PRÁCTICA") || k.includes("RECUPERACIÓN")) && !k.includes("TOTAL")) {
-        let f = new Date(val);
-        return isNaN(f.getTime()) ? val : f.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    if ((nk.includes("FECHA") || nk.includes("VENC") || nk.includes("PRACTICA") || nk.includes("PROXIMA") || nk.includes("RECUPERACION")) && !nk.includes("TOTAL")) {
+        return formatFechaLatina(val);
     }
     return val;
 };
@@ -291,8 +324,15 @@ async function intentarLogin() {
     finally { btn.disabled = false; loader.style.display = "none"; }
 }
 
+function actualizarBotonActivo(tipo) {
+    document.querySelectorAll('.sidebar button[data-seccion]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-seccion') === tipo);
+    });
+}
+
 function mostrarSeccion(tipo) {
     const titulo = document.getElementById('seccionTitulo'), cuerpo = document.getElementById('datosCuerpo');
+    actualizarBotonActivo(tipo);
     titulo.innerText = tipo === 'Abono' ? 'Mis Pagos' : tipo;
     cuerpo.innerHTML = "";
 
@@ -377,7 +417,8 @@ html += `
                         </div>
                     </div>`;
                 } else {
-                    itemHtml += `<div class="general-item"><span class="general-label">${k}</span><span class="general-value">${formatVisual(k, row[k])}</span></div>`;
+                    const etiqueta = getEtiquetaVisual(k);
+                    itemHtml += `<div class="general-item"><span class="general-label">${etiqueta}</span><span class="general-value">${formatVisual(k, row[k])}</span></div>`;
                 }
             });
             itemHtml += `</div></div>`;
