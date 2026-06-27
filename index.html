@@ -11,10 +11,122 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Student Control">
 
-    <title>Student Control 2.6</title>
+    <title>Student Control 2.7</title>
     <link rel="icon" href="favicon.ico" type="image/png">
 
     <style>
+
+        /* ===== CARD TRANSFERENCIA PROFESIONAL ===== */
+.transfer-card {
+    background: linear-gradient(135deg, #f8fafc, #eef2f7);
+    border: 2px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 18px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: grid;
+    gap: 14px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    grid-column: 1 / -1;
+}
+
+.transfer-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+}
+
+.transfer-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.transfer-icon {
+    font-size: 1.5rem;
+}
+
+.transfer-data {
+    font-size: 0.85rem;
+    background: white;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.transfer-data strong {
+    color: #334155;
+}
+
+.transfer-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.btn-copy-main,
+.btn-copy-sec {
+    width: 100%;
+}
+
+.btn-copy-main {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-copy-main:hover {
+    opacity: 0.92;
+}
+
+.btn-copy-sec {
+    background: white;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.transfer-note {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-align: center;
+    margin-top: 6px;
+}
+
+@media (min-width: 720px) {
+    .transfer-buttons {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .btn-copy-main,
+    .btn-copy-sec {
+        flex: 1;
+    }
+
+    .btn-copy-main {
+        margin-right: 8px;
+    }
+
+    .btn-copy-sec {
+        margin-left: 8px;
+    }
+}
+
         :root {
             --primary: #5D2E80;
             --secondary: #334155;
@@ -47,6 +159,7 @@
         .sidebar h2 { font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
         .sidebar button { width: 100%; margin: 8px 0; padding: 12px 15px; border: none; background: rgba(255,255,255,0.1); color: white; cursor: pointer; text-align: left; border-radius: 8px; transition: 0.3s; }
         .sidebar button:hover { background: var(--info-text); color: var(--primary); }
+        .sidebar button.active { background: var(--info-text); color: var(--primary); font-weight: 700; }
         .sidebar .logout { margin-top: auto; background: #ef4444; margin-bottom: 20px; text-align: center; }
 
         .content { flex: 1; padding: 40px; overflow-y: auto; display: none; }
@@ -100,7 +213,7 @@
 
 <div id="login-screen">
     <div class="login-card">
-        <h2 style="color:var(--primary)">ITinstitute Argentina</h2>
+        <h2 style="color:var(--primary)">IT institute Argentina</h2>
         <input type="email" id="emailInput" placeholder="Email registrado">
         <input type="password" id="passwordInput" placeholder="Contraseña">
         <button onclick="intentarLogin()" id="btnLogin">INGRESAR</button>
@@ -113,11 +226,11 @@
 
 <div class="sidebar" id="sidebar">
     <h2>Portal Alumno</h2>
-    <button onclick="mostrarSeccion('Alumno')">👤 Mis Datos</button>
-    <button onclick="mostrarSeccion('Asistencias')">📅 Mis Asistencias</button>
-    <button onclick="mostrarSeccion('Practicas')">🧪 Mis Prácticas</button>
-    <button onclick="mostrarSeccion('Recuperaciones')">🔄 Mis Recuperaciones</button>
-    <button onclick="mostrarSeccion('Abono')">💰 Mis Pagos</button>
+    <button data-seccion="Alumno" onclick="mostrarSeccion('Alumno')">👤 Mis Datos</button>
+    <button data-seccion="Asistencias" onclick="mostrarSeccion('Asistencias')">📅 Mis Asistencias</button>
+    <button data-seccion="Practicas" onclick="mostrarSeccion('Practicas')">🧪 Mis Prácticas</button>
+    <button data-seccion="Recuperaciones" onclick="mostrarSeccion('Recuperaciones')">🔄 Mis Recuperaciones</button>
+    <button data-seccion="Abono" onclick="mostrarSeccion('Abono')">💰 Mis Pagos</button>
     <button class="logout" onclick="location.reload()">Cerrar Sesión</button>
 </div>
 
@@ -131,16 +244,49 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCXpzuTYFNieTm7Ymmi5Ktq5UrnebZuURQbEYqIxJCG3stI-W6Hq_pd86ov5owBmZjOQ/exec";
 let datosGlobales = null;
 
+const normalizarTexto = (texto = "") => texto.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+
+const getEtiquetaVisual = (key) => {
+    const n = normalizarTexto(key);
+    if (n.includes("PROXIMA") && n.includes("PRACTICA")) return "PRÓXIMA PRÁCTICA";
+    return key;
+};
+
+const formatFechaLatina = (fecha) => {
+    if (fecha === "" || fecha === null || fecha === undefined) return "-";
+
+    const texto = fecha.toString().trim();
+    const fechaDirecta = texto.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    if (fechaDirecta) {
+        const [, dia, mes, anio] = fechaDirecta;
+        return `${String(dia).padStart(2, '0')}-${String(mes).padStart(2, '0')}-${anio}`;
+    }
+
+    const fechaIso = texto.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+    if (fechaIso) {
+        const [, anio, mes, dia] = fechaIso;
+        return `${String(dia).padStart(2, '0')}-${String(mes).padStart(2, '0')}-${anio}`;
+    }
+
+    const f = new Date(texto);
+    if (isNaN(f.getTime())) return texto;
+    const dia = String(f.getDate()).padStart(2, '0');
+    const mes = String(f.getMonth() + 1).padStart(2, '0');
+    const anio = f.getFullYear();
+    return `${dia}-${mes}-${anio}`;
+};
+
 const formatVisual = (key, val) => {
     if (val === "" || val === null || val === undefined) return "-";
     const k = key.toUpperCase();
+    const nk = normalizarTexto(key);
     if (k.includes("CUENTA")) return val;
-    if (k.includes("MONTO") || k.includes("CUOTA") || k.includes("PAGO") || k.includes("SALDO") || k.includes("INSCRIP")) {
+    // Agregado CERTIFICADO a la lista de formato moneda
+    if (k.includes("MONTO") || k.includes("CUOTA") || k.includes("PAGO") || k.includes("SALDO") || k.includes("INSCRIP") || k.includes("CERTIFICADO")) {
         if (!isNaN(val)) return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(val);
     }
-    if (k.includes("FECHA") || k.includes("VENC")) {
-        let f = new Date(val);
-        return isNaN(f.getTime()) ? val : f.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    if ((nk.includes("FECHA") || nk.includes("VENC") || nk.includes("PRACTICA") || nk.includes("PROXIMA") || nk.includes("RECUPERACION")) && !nk.includes("TOTAL")) {
+        return formatFechaLatina(val);
     }
     return val;
 };
@@ -178,8 +324,15 @@ async function intentarLogin() {
     finally { btn.disabled = false; loader.style.display = "none"; }
 }
 
+function actualizarBotonActivo(tipo) {
+    document.querySelectorAll('.sidebar button[data-seccion]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-seccion') === tipo);
+    });
+}
+
 function mostrarSeccion(tipo) {
     const titulo = document.getElementById('seccionTitulo'), cuerpo = document.getElementById('datosCuerpo');
+    actualizarBotonActivo(tipo);
     titulo.innerText = tipo === 'Abono' ? 'Mis Pagos' : tipo;
     cuerpo.innerHTML = "";
 
@@ -206,6 +359,43 @@ function mostrarSeccion(tipo) {
                     html += `<div class="mini-cuota-card"><span class="mini-label">CUOTA ${i}</span><span class="mini-monto">${formatVisual(cuotaKey, row[cuotaKey])}</span><span class="mini-vencimiento">${row[vencKey] ? formatVisual(vencKey, row[vencKey]) : 'Sin fecha'}</span></div>`;
                 }
             }
+
+            // ===== CARD TRANSFERENCIA =====
+html += `
+<div class="transfer-card">
+    <div class="transfer-header">
+        <span class="transfer-icon">🏦</span>
+        DATOS PARA TRANSFERENCIA
+    </div>
+
+    <div class="transfer-data">
+        <strong>Alias:</strong><br> iti.arg
+    </div>
+
+    <div class="transfer-data">
+        <strong>CVU:</strong><br> 0000003100030690829838
+    </div>
+
+    <div class="transfer-data">
+        <strong>Nombre:</strong><br> Adrian Alberto Villanueva
+    </div>
+
+    <div class="transfer-buttons">
+        <button class="btn-copy-main" onclick="copiarTexto('iti.arg')">
+            COPIAR ALIAS
+        </button>
+
+        <button class="btn-copy-sec" onclick="copiarTexto('0000003100030690829838')">
+            COPIAR CVU
+        </button>
+    </div>
+
+    <div class="transfer-note">
+        Una vez realizada la transferencia enviar comprobante al profesor.
+    </div>
+</div>
+`;
+
             html += `</div></div>`;
             cuerpo.innerHTML += html;
         });
@@ -227,7 +417,8 @@ function mostrarSeccion(tipo) {
                         </div>
                     </div>`;
                 } else {
-                    itemHtml += `<div class="general-item"><span class="general-label">${k}</span><span class="general-value">${formatVisual(k, row[k])}</span></div>`;
+                    const etiqueta = getEtiquetaVisual(k);
+                    itemHtml += `<div class="general-item"><span class="general-label">${etiqueta}</span><span class="general-value">${formatVisual(k, row[k])}</span></div>`;
                 }
             });
             itemHtml += `</div></div>`;
@@ -245,5 +436,189 @@ function toggleSidebar() {
 }
 </script>
 
+
+
+
+
+<!-- BOTÓN ANDROID -->
+
+<button id="instalarBtn" style="
+
+display:none;
+
+position:fixed;
+
+bottom:20px;
+
+right:20px;
+
+padding:12px 20px;
+
+background:#007bff;
+
+color:white;
+
+border:none;
+
+border-radius:8px;
+
+font-size:16px;
+
+box-shadow:0 4px 10px rgba(0,0,0,0.3);
+
+z-index:9999;">
+
+Instalar App
+
+</button>
+
+
+
+<!-- POPUP iOS -->
+
+<div id="iosPopup" style="
+
+display:none;
+
+position:fixed;
+
+inset:0;
+
+background:rgba(0,0,0,0.6);
+
+z-index:10000;
+
+justify-content:center;
+
+align-items:center;">
+
+<div style="
+
+background:white;
+
+width:90%;
+
+max-width:400px;
+
+padding:25px;
+
+border-radius:16px;
+
+text-align:center;
+
+box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+
+<h3 style="margin-top:0;color:#5D2E80;">Instalar Student Control</h3>
+
+<p style="font-size:14px;">
+
+1️⃣ Toca el botón <b>Compartir</b><br><br>
+
+2️⃣ Selecciona <b>"Agregar a pantalla de inicio"</b>
+
+</p>
+
+<button onclick="cerrarIosPopup()" style="
+
+margin-top:15px;
+
+padding:10px 20px;
+
+border:none;
+
+background:#5D2E80;
+
+color:white;
+
+border-radius:8px;">
+
+Entendido
+
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* SERVICE WORKER */
+
+if("serviceWorker" in navigator){
+
+window.addEventListener("load",()=>{
+
+navigator.serviceWorker.register("/service-worker.js");
+
+});
+
+}
+
+/* DETECTORES */
+
+function esAndroid(){return /android/i.test(navigator.userAgent);}
+
+function esIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+
+function estaInstalada(){
+
+return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+
+}
+
+/* ANDROID */
+
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt",(e)=>{
+
+e.preventDefault();
+
+if(estaInstalada()) return;
+
+deferredPrompt=e;
+
+if(esAndroid()){
+
+document.getElementById("instalarBtn").style.display="block";
+
+}
+
+});
+
+document.getElementById("instalarBtn").addEventListener("click",async()=>{
+
+if(!deferredPrompt) return;
+
+deferredPrompt.prompt();
+
+});
+
+/* iOS */
+
+window.addEventListener("load",()=>{
+if(esIOS() && !estaInstalada()){
+setTimeout(()=>{
+document.getElementById("iosPopup").style.display="flex";
+},2000);
+}
+
+});
+
+function cerrarIosPopup(){
+document.getElementById("iosPopup").style.display="none";
+}
+
+function copiarTexto(texto) {
+    navigator.clipboard.writeText(texto).then(() => {
+        alert("Copiado correctamente ✅");
+    }).catch(() => {
+        alert("No se pudo copiar automáticamente.");
+    });
+}
+
+</script>
+
 </body>
+
 </html>
